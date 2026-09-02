@@ -1,0 +1,61 @@
+name: K6 Load Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_name:
+        description: "Test Name"
+        required: true
+        type: string
+
+      target_url:
+        description: "Target URL"
+        required: true
+        type: string
+
+      vus:
+        description: "Number of Virtual Users"
+        required: true
+        default: "5"
+        type: string
+
+      duration:
+        description: "Test Duration"
+        required: true
+        default: "30s"
+        type: string
+
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run K6 Load Test
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.MON_SERVER_HOST }}
+          username: ${{ secrets.MON_SERVER_USER }}
+          key: ${{ secrets.MON_SERVER_SSH_KEY }}
+
+          script: |
+            set -e
+
+            cd /home/mon/K6
+
+            echo "================================="
+            echo "K6 Load Test"
+            echo "TEST_NAME: ${{ inputs.test_name }}"
+            echo "TARGET_URL: ${{ inputs.target_url }}"
+            echo "VUS: ${{ inputs.vus }}"
+            echo "DURATION: ${{ inputs.duration }}"
+            echo "================================="
+
+            cat > .env <<EOF
+            TARGET_URL=${{ inputs.target_url }}
+            VUS=${{ inputs.vus }}
+            DURATION=${{ inputs.duration }}
+            TEST_ID=${{ inputs.test_name }}
+            K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+            EOF
+
+            docker compose run --rm k6

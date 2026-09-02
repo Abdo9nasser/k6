@@ -1,0 +1,26 @@
+# docker-compose.yml
+
+services:
+  k6:
+    image: grafana/k6:latest
+    container_name: k6
+    restart: "no"
+
+    env_file:
+      - .env
+
+    volumes:
+      - ./tests:/tests:ro
+
+    networks:
+      - otel_default
+
+    command:
+      - run
+      - --out
+      - experimental-prometheus-rw
+      - /tests/test.js
+
+networks:
+  otel_default:
+    external: true
