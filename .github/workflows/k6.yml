@@ -35,8 +35,6 @@ jobs:
         with:
           host: ${{ secrets.MON_SERVER_HOST }}
           username: ${{ secrets.MON_SERVER_USER }}
-    
-      
           password: ${{ secrets.MON_SERVER_PASSWORD }}
           script: |
             set -e
